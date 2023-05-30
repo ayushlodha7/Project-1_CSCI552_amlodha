@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+	
+<!-- load the d3.js library -->    	
+<script src="https://d3js.org/d3.v6.min.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="Multibar_Grouped_Chart"></div>
+
+<script>
+
+    // Below block of code is set of graph margins and dimensions
+    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+        width = 1060 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+    // Set ranges of x and y
+    var x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1);
+
+    var y = d3.scaleLinear()
+            .range([height, 0]);
+        
+    // define the main svg from the below block
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", 
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // Get data
+    d3.csv("008 iris.csv").then(function(data) {
+        // Format data
+        data.forEach(function(d) {
+            d.Sepal_Length = +d.Sepal_Length;
+            d.Sepal_Width = +d.Sepal_Width;
+            d.Petal_Length = +d.Petal_Length;
+            d.Petal_Width = +d.Petal_Width;
+        });
+
+    // Define the scale of the range of data in domains
+    x.domain(data.map(function(d) { return d.Species; }));
+    y.domain([0, d3.max(data, function(d) { return d.Sepal_Length; })]);
+
+    // Append rectangles of Sepal_Length to bar chart
+    svg.selectAll(".bar.Sepal_Length")
+        .data(data)
+        .enter()
+        .append("rect")
+        .style("fill", "#0e2433")
+        .attr("class", "bar sepal_length")
+        .attr("x", function(d) { return x(d.Species)+80; })
+        .attr("width", 20)
+        .attr("y", function(d) { return y(d.Sepal_Length); })
+        .attr("height", function(d) { return height - y(d.Sepal_Length); });
+
+    // Append rectangles of Sepal_Width to bar chart
+    svg.selectAll(".bar.Sepal_Width")
+        .data(data)
+        .enter()
+        .append("rect")
+        .style("fill", "#1c4966")
+        .attr("class", "bar sepal_width")
+        .attr("x", function(d) { return x(d.Species)+100; })
+        .attr("width", 20)
+        .attr("y", function(d) { return y(d.Sepal_Width); })
+        .attr("height", function(d) { return height - y(d.Sepal_Width); });
+
+    // Append rectangles of Petal_Length to bar chart
+    svg.selectAll(".bar.Pepal_Length")
+        .data(data)
+        .enter()
+        .append("rect")
+        .style("fill", "#296d98")
+        .attr("class", "bar Petal_Length")
+        .attr("x", function(d) { return x(d.Species)+120; })
+        .attr("width", 20)
+        .attr("y", function(d) { return y(d.Petal_Length); })
+        .attr("height", function(d) { return height - y(d.Petal_Length); });
+
+    // Append rectangles of Petal_Width to bar chart
+    svg.selectAll(".bar.Pepal_Width")
+        .data(data)
+        .enter()
+        .append("rect")
+        .style("fill", "#3792cb")
+        .attr("class", "bar Petal_Width")
+        .attr("x", function(d) { return x(d.Species)+140; })
+        .attr("width", 20)
+        .attr("y", function(d) { return y(d.Petal_Width); })
+        .attr("height", function(d) { return height - y(d.Petal_Width); });
+
+    // Add x axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+        .style("font-size", "15px");
+    
+
+    // Add X axis label:
+    svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height + margin.top)
+        .text("Species")
+        .style("font-size", "18px");
+
+    // Add y axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Added y axis label:
+    svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -margin.left+20)
+        .attr("x", -margin.top)
+        .text("In CM")
+        .style("font-size", "18px");
+
+    // Legend and their labels
+    svg.append("circle").attr("cx",900).attr("cy",30).attr("r", 6).style("fill", "#0e2433")
+    svg.append("circle").attr("cx",900).attr("cy",60).attr("r", 6).style("fill", "#1c4966")
+    svg.append("circle").attr("cx",900).attr("cy",90).attr("r", 6).style("fill", "#296d98")
+    svg.append("circle").attr("cx",900).attr("cy",120).attr("r", 6).style("fill", "#3792cb")
+    svg.append("text").attr("x", 920).attr("y", 30).text("Sepal_Length").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", 920).attr("y", 60).text("Sepal_Width").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", 920).attr("y", 90).text("Petal_Length").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", 920).attr("y", 120).text("Petal_Width").style("font-size", "15px").attr("alignment-baseline","middle")
+
+    // Added Main title for the graph
+    svg.append("text")
+        .attr("x", width/2)
+        .attr("y", 0)
+        .attr("text-anchor", "middle")
+        .style("font-size", "24px")
+        .text("Multibar Grouped Chart");
+
+    });
+
+</script>
+</body>

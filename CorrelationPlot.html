@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="CorrelationPlot"></div>
+
+<script>
+
+    // Below block of code is set of graph margins and dimensions
+    var margin = {top: 50, right: 100, bottom: 100, left: 50},
+        width = 550 - margin.left - margin.right,
+        height = 550 - margin.top - margin.bottom
+    
+    // define the main svg from the below block
+    var svg = d3.select("#CorrelationPlot")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    // Get data from the csv file corr_iris.csv (correlation matrix dataframe)
+    d3.csv("corr_iris.csv", function(error, rows) {
+    
+      // Going from wide to long format
+      var data = [];
+      rows.forEach(function(d) {
+        var x = d[""];
+        delete d[""];
+        for (prop in d) {
+          var y = prop,
+            value = d[prop];
+          data.push({
+            x: x,
+            y: y,
+            value: +value
+          });
+        }
+      });
+    
+      // List of all variables and number of them
+      var domain = d3.set(data.map(function(d) { return d.x })).values()
+      var num = Math.sqrt(data.length)
+    
+      // Create a color scale
+      var color = d3.scaleLinear()
+        .domain([-1, 0, 1])
+        .range(["#B22222", "#fff", "#000080"]);
+    
+      // Create a size scale for bubbles on top right. Watch out: must be a rootscale!
+      var size = d3.scaleSqrt()
+        .domain([0, 1])
+        .range([0, 9]);
+    
+      // X scale
+      var x = d3.scalePoint()
+        .range([0, width])
+        .domain(domain)
+    
+      // Y scale
+      var y = d3.scalePoint()
+        .range([0, height])
+        .domain(domain)
+    
+      // Create one 'g' element for each cell of the correlogram
+      var cor = svg.selectAll(".cor")
+        .data(data)
+        .enter()
+        .append("g")
+          .attr("class", "cor")
+          .attr("transform", function(d) {
+            return "translate(" + x(d.x) + "," + y(d.y) + ")";
+          });
+    
+      // Low left part + Diagonal: Add the text with specific color
+      cor
+        .filter(function(d){
+          var ypos = domain.indexOf(d.y);
+          var xpos = domain.indexOf(d.x);
+          return xpos <= ypos;
+        })
+        .append("text")
+          .attr("y", 5)
+          .text(function(d) {
+            if (d.x === d.y) {
+              return d.x;
+            } else {
+              return d.value.toFixed(2);
+            }
+          })
+          .style("font-size", 18)
+          .style("text-align", "center")
+          .style("fill", function(d){
+            if (d.x === d.y) {
+              return "#000";
+            } else {
+              return color(d.value);
+            }
+          });
+    
+    
+      // Up right part: add circles
+      cor
+        .filter(function(d){
+          var ypos = domain.indexOf(d.y);
+          var xpos = domain.indexOf(d.x);
+          return xpos > ypos;
+        })
+        .append("circle")
+          .attr("r", function(d){ return size(Math.abs(d.value)) })
+          .style("fill", function(d){
+            if (d.x === d.y) {
+              return "#000";
+            } else {
+              return color(d.value);
+            }
+          })
+          .style("opacity", 1)
+
+    // Added Main title for the graph
+    svg.append("text")
+        .attr("x", width/2)
+        .attr("y", -20)
+        .attr("text-anchor", "middle")
+        .style("font-size", "30px")
+        .text("Correlation Matrix");
+
+    })
+    
+</script>
